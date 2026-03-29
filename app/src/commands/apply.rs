@@ -2,7 +2,8 @@ use super::ComtryaCommand;
 use crate::Runtime;
 use clap::Parser;
 use comfy_table::{Cell, ContentArrangement, Table};
-use comtrya_lib::contexts::to_rhai;
+use comtrya_lib::actions::Action;
+use comtrya_lib::contexts::{to_rhai, Contexts};
 use comtrya_lib::manifests::{load, Manifest};
 use core::panic;
 use petgraph::{visit::DfsPostOrder, Graph};
@@ -206,8 +207,6 @@ impl ComtryaCommand for Apply {
                 )
                 .entered();
 
-                let mut successful = true;
-
                 if let Some(label) = self.label.as_ref() {
                     if !m1.labels.contains(label) {
                         info!(
@@ -242,58 +241,7 @@ impl ComtryaCommand for Apply {
                     }
                 }
 
-                for action in m1.actions.iter() {
-                    let span_action = span!(tracing::Level::INFO, "", %action).entered();
-
-                    let action = action.inner_ref();
-
-                    let plan = match action.plan(m1, contexts) {
-                        Ok(steps) => steps,
-                        Err(err) => {
-                            info!("Action failed to get plan: {:?}", err);
-                            successful = false;
-                            continue;
-                        }
-                    };
-
-                    let mut steps = plan
-                        .into_iter()
-                        .filter(|step| step.do_initializers_allow_us_to_run())
-                        .filter(|step| match step.atom.plan() {
-                            Ok(outcome) => outcome.should_run,
-                            Err(_) => false,
-                        })
-                        .peekable();
-
-                    if steps.peek().is_none() {
-                        info!("nothing to be done to reconcile action");
-                        span_action.exit();
-                        continue;
-                    }
-
-                    for mut step in steps {
-                        if dry_run {
-                            continue;
-                        }
-
-                        match step.atom.execute() {
-                            Ok(_) => (),
-                            Err(err) => {
-                                debug!("Atom failed to execute: {:?}", err);
-                                successful = false;
-                                break;
-                            }
-                        }
-
-                        if !step.do_finalizers_allow_us_to_continue() {
-                            debug!("Finalizers won't allow us to continue with this action");
-                            successful = false;
-                            break;
-                        }
-                    }
-                    info!("{}", action.summarize());
-                    span_action.exit();
-                }
+                let successful = execute_actions(&m1, contexts, &m1.actions, dry_run);
 
                 if dry_run {
                     span_manifest.exit();
@@ -313,4 +261,78 @@ impl ComtryaCommand for Apply {
 
         Ok(())
     }
+}
+
+fn execute_actions(
+    manifest: &Manifest,
+    contexts: &Contexts,
+    actions: &Vec<Action>,
+    dry_run: bool,
+) -> bool {
+    let mut successful = true;
+
+    for action in actions.iter() {
+        let span_action = span!(tracing::Level::INFO, "", action = %action.action).entered();
+
+        if !execute_actions(manifest, contexts, &action.before, dry_run) {
+            return false;
+        }
+
+        {
+            let action = action.action.inner_ref();
+
+            let plan = match action.plan(manifest, contexts) {
+                Ok(steps) => steps,
+                Err(err) => {
+                    info!("Action failed to get plan: {:?}", err);
+                    successful = false;
+                    continue;
+                }
+            };
+
+            let mut steps = plan
+                .into_iter()
+                .filter(|step| step.do_initializers_allow_us_to_run())
+                .filter(|step| match step.atom.plan() {
+                    Ok(outcome) => outcome.should_run,
+                    Err(_) => false,
+                })
+                .peekable();
+
+            if steps.peek().is_none() {
+                info!("nothing to be done to reconcile action");
+                span_action.exit();
+                continue;
+            }
+
+            for mut step in steps {
+                if dry_run {
+                    continue;
+                }
+
+                match step.atom.execute() {
+                    Ok(_) => (),
+                    Err(err) => {
+                        debug!("Atom failed to execute: {:?}", err);
+                        successful = false;
+                        break;
+                    }
+                }
+
+                if !step.do_finalizers_allow_us_to_continue() {
+                    debug!("Finalizers won't allow us to continue with this action");
+                    successful = false;
+                    break;
+                }
+            }
+            info!("{}", action.summarize());
+        }
+
+        if !execute_actions(manifest, contexts, &action.after, dry_run) {
+            successful = false;
+        }
+
+        span_action.exit();
+    }
+    successful
 }

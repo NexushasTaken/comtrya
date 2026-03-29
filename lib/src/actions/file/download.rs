@@ -114,9 +114,9 @@ impl Plan for FileDownload {
 mod tests {
     #[cfg(unix)]
     use crate::actions::file::download::FileDownload;
+    use crate::actions::ActionProviders;
     #[cfg(unix)]
     use crate::actions::Plan;
-    use crate::actions::ActionProviders;
 
     #[test]
     fn it_can_be_deserialized() {

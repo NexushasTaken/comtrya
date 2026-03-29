@@ -127,7 +127,7 @@ impl PackageProvider for Yay {
     fn install(&self, package: &PackageVariant, _contexts: &Contexts) -> anyhow::Result<Vec<Step>> {
         // Does not require privilege escalation?
 
-       let need_installed = self.query(package)?;
+        let need_installed = self.query(package)?;
         if need_installed.is_empty() {
             return Ok(vec![]);
         }

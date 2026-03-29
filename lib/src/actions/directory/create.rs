@@ -45,10 +45,10 @@ mod tests {
     #[test]
     fn it_can_be_deserialized() {
         let example_yaml = std::fs::File::open(get_manifest_dir().join("create.yaml")).unwrap();
-        let mut manifest: Manifest = serde_yaml_ng::from_reader(example_yaml).unwrap();
+        let manifest: Manifest = serde_yaml_ng::from_reader(example_yaml).unwrap();
 
-        match manifest.actions.pop() {
-            Some(ActionProviders::DirectoryCreate(action)) => {
+        match &manifest.actions[0].action {
+            ActionProviders::DirectoryCreate(action) => {
                 assert_eq!("/some-directory", action.action.path);
             }
             _ => {

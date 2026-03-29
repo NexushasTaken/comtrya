@@ -92,10 +92,10 @@ mod tests {
     #[test]
     fn it_can_be_deserialized() {
         let example_yaml = std::fs::File::open(get_manifest_dir().join("dircopy.yaml")).unwrap();
-        let mut manifest: Manifest = serde_yaml_ng::from_reader(example_yaml).unwrap();
+        let manifest: Manifest = serde_yaml_ng::from_reader(example_yaml).unwrap();
 
-        match manifest.actions.pop() {
-            Some(ActionProviders::DirectoryCopy(action)) => {
+        match &manifest.actions[0].action {
+            ActionProviders::DirectoryCopy(action) => {
                 assert_eq!("mydir", action.action.from);
                 assert_eq!("/tmp/dircopy", action.action.to);
             }

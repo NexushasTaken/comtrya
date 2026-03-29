@@ -145,7 +145,7 @@ impl Plan for FileLink {
 #[cfg(test)]
 mod tests {
     use crate::{
-        actions::{Plan, ActionProviders},
+        actions::{ActionProviders, Plan},
         config::Config,
         contexts::build_contexts,
         manifests::Manifest,

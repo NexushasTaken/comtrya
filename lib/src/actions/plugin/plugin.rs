@@ -410,7 +410,7 @@ return {
             }]
         }))?;
 
-        let mut steps = manifest.actions.first().unwrap().plan(
+        let mut steps = manifest.actions.first().unwrap().action.plan(
             &manifest,
             &build_contexts(&Config {
                 ..Default::default()

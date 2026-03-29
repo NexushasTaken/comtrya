@@ -1,7 +1,7 @@
 mod load;
 pub use load::load;
 mod providers;
-use crate::actions::ActionProviders;
+use crate::actions::Action;
 use petgraph::prelude::*;
 pub use providers::register_providers;
 pub use providers::ManifestProvider;
@@ -25,7 +25,7 @@ pub struct Manifest {
     pub depends: Vec<String>,
 
     #[serde(default)]
-    pub actions: Vec<ActionProviders>,
+    pub actions: Vec<Action>,
 
     #[serde(skip)]
     pub root_dir: Option<PathBuf>,

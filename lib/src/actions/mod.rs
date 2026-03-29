@@ -284,6 +284,18 @@ pub trait Plan {
     fn plan(&self, manifest: &Manifest, context: &Contexts) -> anyhow::Result<Vec<Step>>;
 }
 
+#[derive(JsonSchema, Clone, Debug, Serialize, Deserialize)]
+pub struct Action {
+    #[serde(flatten)]
+    pub action: ActionProviders,
+
+    #[serde(default)]
+    pub before: Vec<Action>,
+
+    #[serde(default)]
+    pub after: Vec<Action>,
+}
+
 #[cfg(test)]
 mod tests {
     use crate::actions::{command::run::RunCommand, ActionProviders};
@@ -303,7 +315,7 @@ actions:
 "#;
         let m: Manifest = serde_yaml_ng::from_str(content).unwrap();
 
-        let action = &m.actions[0];
+        let action = &m.actions[0].action;
 
         let ext = match action {
             ActionProviders::CommandRun(cr) => cr,
@@ -328,5 +340,90 @@ actions:
         let variant = &ext.variants[0];
         assert_eq!(variant.condition, Some(String::from("Debian")));
         assert_eq!(variant.action.command, "halt");
+    }
+
+    #[test]
+    fn can_parse_before_after() {
+        let content = r#"
+actions:
+  - action: command.run
+    command: echo
+    args:
+      - Action
+    after:
+      - action: command.run
+        command: echo
+        args:
+          - After
+    before:
+      - action: command.run
+        command: echo
+        args:
+          - Before
+"#;
+        let m: Manifest = serde_yaml_ng::from_str(content).unwrap();
+        println!("{:#?}", m);
+
+        let action = &m.actions[0].action;
+
+        let ext = match action {
+            ActionProviders::CommandRun(cr) => cr,
+            _ => panic!("did not get a command to run"),
+        };
+
+        assert_eq!(
+            ext.action,
+            RunCommand {
+                command: "echo".into(),
+                args: vec!["Action".into()],
+                privileged: false,
+                dir: std::env::current_dir()
+                    .unwrap()
+                    .into_os_string()
+                    .into_string()
+                    .unwrap(),
+                ..Default::default()
+            }
+        );
+
+        let before_action = match &m.actions[0].before[0].action {
+            ActionProviders::CommandRun(cr) => cr,
+            _ => panic!("did not get a command to run"),
+        };
+
+        assert_eq!(
+            before_action.action,
+            RunCommand {
+                command: "echo".into(),
+                args: vec!["Before".into()],
+                privileged: false,
+                dir: std::env::current_dir()
+                    .unwrap()
+                    .into_os_string()
+                    .into_string()
+                    .unwrap(),
+                ..Default::default()
+            }
+        );
+
+        let after_action = match &m.actions[0].after[0].action {
+            ActionProviders::CommandRun(cr) => cr,
+            _ => panic!("did not get a command to run"),
+        };
+
+        assert_eq!(
+            after_action.action,
+            RunCommand {
+                command: "echo".into(),
+                args: vec!["After".into()],
+                privileged: false,
+                dir: std::env::current_dir()
+                    .unwrap()
+                    .into_os_string()
+                    .into_string()
+                    .unwrap(),
+                ..Default::default()
+            }
+        );
     }
 }
