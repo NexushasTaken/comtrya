@@ -100,7 +100,7 @@ impl Default for PackageProviders {
 
         match info.os_type() {
             // Arch Variants
-            os_info::Type::Arch => PackageProviders::Yay,
+            os_info::Type::Arch => PackageProviders::Pacman,
             os_info::Type::Artix => PackageProviders::Yay,
             os_info::Type::CachyOS => PackageProviders::Yay,
             os_info::Type::EndeavourOS => PackageProviders::Yay,
