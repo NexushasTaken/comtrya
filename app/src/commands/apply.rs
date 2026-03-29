@@ -276,7 +276,8 @@ fn execute_actions(
 
         if !execute_actions(manifest, contexts, &action.before, dry_run) {
             span_action.exit();
-            return false;
+            successful = false;
+            continue;
         }
 
         {
@@ -286,6 +287,7 @@ fn execute_actions(
                 Ok(steps) => steps,
                 Err(err) => {
                     info!("Action failed to get plan: {:?}", err);
+                    span_action.exit();
                     successful = false;
                     continue;
                 }
