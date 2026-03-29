@@ -17,6 +17,8 @@ mod snapcraft;
 use self::snapcraft::Snapcraft;
 mod yay;
 use self::yay::Yay;
+mod pacman;
+use self::pacman::Pacman;
 mod winget;
 use self::winget::Winget;
 mod xbps;
@@ -51,8 +53,11 @@ pub enum PackageProviders {
     #[serde(rename = "snapcraft", alias = "snap")]
     Snapcraft,
 
-    #[serde(rename = "yay", alias = "pacman")]
+    #[serde(rename = "yay")]
     Yay,
+
+    #[serde(rename = "pacman")]
+    Pacman,
 
     #[serde(rename = "paru")]
     Paru,
@@ -77,6 +82,7 @@ impl PackageProviders {
             PackageProviders::Macports => Box::new(Macports {}),
             PackageProviders::Pkgin => Box::new(Pkgin {}),
             PackageProviders::Yay => Box::new(Yay {}),
+            PackageProviders::Pacman => Box::new(Pacman {}),
             PackageProviders::Paru => Box::new(Paru {}),
             PackageProviders::Winget => Box::new(Winget {}),
             PackageProviders::Xbps => Box::new(Xbps {}),
@@ -94,7 +100,7 @@ impl Default for PackageProviders {
 
         match info.os_type() {
             // Arch Variants
-            os_info::Type::Arch=> PackageProviders::Yay,
+            os_info::Type::Arch => PackageProviders::Yay,
             os_info::Type::Artix => PackageProviders::Yay,
             os_info::Type::CachyOS => PackageProviders::Yay,
             os_info::Type::EndeavourOS => PackageProviders::Yay,
