@@ -275,6 +275,7 @@ fn execute_actions(
         let span_action = span!(tracing::Level::INFO, "", action = %action.action).entered();
 
         if !execute_actions(manifest, contexts, &action.before, dry_run) {
+            span_action.exit();
             return false;
         }
 
@@ -299,33 +300,32 @@ fn execute_actions(
                 })
                 .peekable();
 
-            if steps.peek().is_none() {
-                info!("nothing to be done to reconcile action");
-                span_action.exit();
-                continue;
-            }
+            match steps.peek() {
+                Some(_) => {
+                    for mut step in steps {
+                        if dry_run {
+                            continue;
+                        }
 
-            for mut step in steps {
-                if dry_run {
-                    continue;
-                }
+                        match step.atom.execute() {
+                            Ok(_) => (),
+                            Err(err) => {
+                                debug!("Atom failed to execute: {:?}", err);
+                                successful = false;
+                                break;
+                            }
+                        }
 
-                match step.atom.execute() {
-                    Ok(_) => (),
-                    Err(err) => {
-                        debug!("Atom failed to execute: {:?}", err);
-                        successful = false;
-                        break;
+                        if !step.do_finalizers_allow_us_to_continue() {
+                            debug!("Finalizers won't allow us to continue with this action");
+                            successful = false;
+                            break;
+                        }
                     }
+                    info!("{}", action.summarize());
                 }
-
-                if !step.do_finalizers_allow_us_to_continue() {
-                    debug!("Finalizers won't allow us to continue with this action");
-                    successful = false;
-                    break;
-                }
+                None => info!("nothing to be done to reconcile action"),
             }
-            info!("{}", action.summarize());
         }
 
         if !execute_actions(manifest, contexts, &action.after, dry_run) {
