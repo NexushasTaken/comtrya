@@ -96,8 +96,6 @@ impl Default for PackageProviders {
     fn default() -> Self {
         let info = os_info::get();
 
-        println!("Info: {info:?}");
-
         match info.os_type() {
             // Arch Variants
             os_info::Type::Arch => PackageProviders::Pacman,
