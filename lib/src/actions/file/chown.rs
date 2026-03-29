@@ -1,4 +1,4 @@
-use crate::actions::Action;
+use crate::actions::Plan;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -17,7 +17,7 @@ impl FileChown {}
 
 impl FileAction for FileChown {}
 
-impl Action for FileChown {
+impl Plan for FileChown {
     fn summarize(&self) -> String {
         format!("Changing ownership for file {}", self.path)
     }
@@ -54,7 +54,7 @@ impl Action for FileChown {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::Actions;
+    use crate::actions::ActionProviders;
 
     #[test]
     fn it_can_be_deserialized_user() {
@@ -64,9 +64,9 @@ mod tests {
   user: test
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
         match actions.pop() {
-            Some(Actions::FileChown(action)) => {
+            Some(ActionProviders::FileChown(action)) => {
                 assert_eq!("/home/test/one", action.action.path);
                 assert_eq!("test", action.action.user.unwrap());
                 assert_eq!(None, action.action.group);
@@ -85,9 +85,9 @@ mod tests {
   group: test
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
         match actions.pop() {
-            Some(Actions::FileChown(action)) => {
+            Some(ActionProviders::FileChown(action)) => {
                 assert_eq!("/home/test/one", action.action.path);
                 assert_eq!(None, action.action.user);
                 assert_eq!("test", action.action.group.unwrap());

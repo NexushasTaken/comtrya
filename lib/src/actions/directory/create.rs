@@ -1,7 +1,7 @@
 use crate::atoms::directory::Create as DirectoryCreateAtom;
 use crate::manifests::Manifest;
 use crate::steps::Step;
-use crate::{actions::Action, contexts::Contexts};
+use crate::{actions::Plan, contexts::Contexts};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -11,7 +11,7 @@ pub struct DirectoryCreate {
     pub path: String,
 }
 
-impl Action for DirectoryCreate {
+impl Plan for DirectoryCreate {
     fn summarize(&self) -> String {
         format!("Creating directory {}", self.path)
     }
@@ -29,7 +29,7 @@ impl Action for DirectoryCreate {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::Actions;
+    use crate::actions::ActionProviders;
     use crate::manifests::Manifest;
     use std::path::PathBuf;
 
@@ -48,7 +48,7 @@ mod tests {
         let mut manifest: Manifest = serde_yaml_ng::from_reader(example_yaml).unwrap();
 
         match manifest.actions.pop() {
-            Some(Actions::DirectoryCreate(action)) => {
+            Some(ActionProviders::DirectoryCreate(action)) => {
                 assert_eq!("/some-directory", action.action.path);
             }
             _ => {

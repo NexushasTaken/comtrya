@@ -4,7 +4,7 @@ use crate::atoms::directory::Remove as RemoveDirAtom;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::{actions::Action, steps::Step};
+use crate::{actions::Plan, steps::Step};
 
 use super::DirectoryAction;
 
@@ -17,7 +17,7 @@ impl DirectoryRemove {}
 
 impl DirectoryAction for DirectoryRemove {}
 
-impl Action for DirectoryRemove {
+impl Plan for DirectoryRemove {
     fn summarize(&self) -> String {
         format!("Removing directory {}", self.target)
     }
@@ -41,7 +41,7 @@ impl Action for DirectoryRemove {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::Actions;
+    use crate::actions::ActionProviders;
 
     #[test]
     fn it_can_be_deserialized() {
@@ -50,10 +50,10 @@ mod tests {
   target: a
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::DirectoryRemove(action)) => {
+            Some(ActionProviders::DirectoryRemove(action)) => {
                 assert_eq!("a", action.action.target);
             }
             _ => {

@@ -1,7 +1,7 @@
 use crate::atoms::command::Exec;
 use crate::contexts::Contexts;
 use crate::steps::Step;
-use crate::{actions::Action, manifests::Manifest};
+use crate::{actions::Plan, manifests::Manifest};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +16,7 @@ pub struct MacOSDefault {
     pub value: String,
 }
 
-impl Action for MacOSDefault {
+impl Plan for MacOSDefault {
     fn plan(&self, _: &Manifest, _: &Contexts) -> anyhow::Result<Vec<Step>> {
         Ok(vec![Step {
             atom: Box::new(Exec {

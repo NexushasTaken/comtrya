@@ -4,7 +4,7 @@ use super::{default_chmod, from_octal};
 use crate::atoms::file::Chown;
 use crate::manifests::Manifest;
 use crate::steps::Step;
-use crate::{actions::Action, contexts::Contexts};
+use crate::{actions::Plan, contexts::Contexts};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -36,7 +36,7 @@ impl FileDownload {}
 
 impl FileAction for FileDownload {}
 
-impl Action for FileDownload {
+impl Plan for FileDownload {
     fn summarize(&self) -> String {
         format!("Downloading file {} to {}", self.from, self.to)
     }
@@ -115,8 +115,8 @@ mod tests {
     #[cfg(unix)]
     use crate::actions::file::download::FileDownload;
     #[cfg(unix)]
-    use crate::actions::Action;
-    use crate::actions::Actions;
+    use crate::actions::Plan;
+    use crate::actions::ActionProviders;
 
     #[test]
     fn it_can_be_deserialized() {
@@ -126,10 +126,10 @@ mod tests {
   to: b
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::FileDownload(action)) => {
+            Some(ActionProviders::FileDownload(action)) => {
                 assert_eq!("a", action.action.from);
                 assert_eq!("b", action.action.to);
             }
@@ -150,10 +150,10 @@ mod tests {
   owned_by_group: test
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::FileDownload(action)) => {
+            Some(ActionProviders::FileDownload(action)) => {
                 assert_eq!("a", action.action.from);
                 assert_eq!("b", action.action.to);
                 assert_eq!("test", action.action.owner_user.unwrap());

@@ -1,5 +1,5 @@
 use super::DirectoryAction;
-use crate::actions::Action;
+use crate::actions::Plan;
 use crate::contexts::Contexts;
 use crate::steps::Step;
 use crate::{atoms::command::Exec, manifests::Manifest};
@@ -17,7 +17,7 @@ impl DirectoryCopy {}
 impl DirectoryAction for DirectoryCopy {}
 
 #[cfg(target_family = "windows")]
-impl Action for DirectoryCopy {
+impl Plan for DirectoryCopy {
     fn summarize(&self) -> String {
         format!("Copying {} to {}", self.from, self.to)
     }
@@ -38,7 +38,7 @@ impl Action for DirectoryCopy {
 }
 
 #[cfg(target_family = "unix")]
-impl Action for DirectoryCopy {
+impl Plan for DirectoryCopy {
     fn summarize(&self) -> String {
         format!("Copying {} to {}", self.from, self.to)
     }
@@ -75,7 +75,7 @@ impl Action for DirectoryCopy {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::Actions;
+    use crate::actions::ActionProviders;
     use crate::manifests::Manifest;
     use std::path::PathBuf;
 
@@ -95,7 +95,7 @@ mod tests {
         let mut manifest: Manifest = serde_yaml_ng::from_reader(example_yaml).unwrap();
 
         match manifest.actions.pop() {
-            Some(Actions::DirectoryCopy(action)) => {
+            Some(ActionProviders::DirectoryCopy(action)) => {
                 assert_eq!("mydir", action.action.from);
                 assert_eq!("/tmp/dircopy", action.action.to);
             }

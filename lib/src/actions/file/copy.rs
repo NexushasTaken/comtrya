@@ -6,7 +6,7 @@ use crate::atoms::file::Decrypt;
 use crate::manifests::Manifest;
 use crate::steps::Step;
 use crate::tera_functions::register_functions;
-use crate::{actions::Action, contexts::to_tera};
+use crate::{actions::Plan, contexts::to_tera};
 use anyhow::anyhow;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -45,7 +45,7 @@ impl FileCopy {}
 
 impl FileAction for FileCopy {}
 
-impl Action for FileCopy {
+impl Plan for FileCopy {
     fn summarize(&self) -> String {
         format!("Copy file from {} to {}", self.from, self.to)
     }
@@ -170,7 +170,7 @@ impl Action for FileCopy {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::Actions;
+    use crate::actions::ActionProviders;
 
     #[test]
     fn it_can_be_deserialized() {
@@ -181,10 +181,10 @@ mod tests {
   chmod: "0777"
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::FileCopy(action)) => {
+            Some(ActionProviders::FileCopy(action)) => {
                 assert_eq!("a", action.action.from);
                 assert_eq!("b", action.action.to);
                 assert_eq!(0o777, action.action.chmod);
@@ -206,10 +206,10 @@ mod tests {
   owned_by_group: test
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::FileCopy(action)) => {
+            Some(ActionProviders::FileCopy(action)) => {
                 assert_eq!("a", action.action.from);
                 assert_eq!("b", action.action.to);
                 assert_eq!(0o777, action.action.chmod);

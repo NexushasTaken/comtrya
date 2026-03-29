@@ -1,4 +1,4 @@
-use crate::{actions::Action, manifests::Manifest};
+use crate::{actions::Plan, manifests::Manifest};
 use normpath::PathExt;
 use std::path::PathBuf;
 
@@ -9,7 +9,7 @@ pub use copy::DirectoryCopy;
 pub use create::DirectoryCreate;
 pub use remove::DirectoryRemove;
 
-pub trait DirectoryAction: Action {
+pub trait DirectoryAction: Plan {
     fn resolve(&self, manifest: &Manifest, path: &str) -> PathBuf {
         manifest
             .root_dir

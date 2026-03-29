@@ -1,7 +1,7 @@
 use super::providers::PackageProviders;
 use super::Package;
 use super::PackageVariant;
-use crate::actions::Action;
+use crate::actions::Plan;
 use crate::contexts::Contexts;
 use crate::manifests::Manifest;
 use crate::steps::Step;
@@ -12,7 +12,7 @@ use tracing::span;
 
 pub type PackageInstall = Package;
 
-impl Action for PackageInstall {
+impl Plan for PackageInstall {
     fn summarize(&self) -> String {
         "Installing packages".to_string()
     }
@@ -68,7 +68,7 @@ impl Action for PackageInstall {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::Actions;
+    use crate::actions::ActionProviders;
 
     #[test]
     fn it_can_be_deserialized() {
@@ -81,10 +81,10 @@ mod tests {
     - bash
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::PackageInstall(action)) => {
+            Some(ActionProviders::PackageInstall(action)) => {
                 assert_eq!(vec!["bash"], action.action.list);
             }
             _ => {
@@ -93,7 +93,7 @@ mod tests {
         };
 
         match actions.pop() {
-            Some(Actions::PackageInstall(action)) => {
+            Some(ActionProviders::PackageInstall(action)) => {
                 assert_eq!("curl", action.action.name.unwrap());
             }
             _ => {

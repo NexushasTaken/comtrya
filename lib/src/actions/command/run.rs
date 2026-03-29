@@ -2,7 +2,7 @@ use crate::contexts::Contexts;
 use crate::steps::finalizers::RemoveEnvVars;
 use crate::steps::initializers::SetEnvVars;
 use crate::steps::Step;
-use crate::{actions::Action, manifests::Manifest, steps, utilities};
+use crate::{actions::Plan, manifests::Manifest, steps, utilities};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -34,7 +34,7 @@ fn get_cwd() -> String {
         .expect("Failed to get current directory")
 }
 
-impl Action for RunCommand {
+impl Plan for RunCommand {
     fn summarize(&self) -> String {
         format!("Running {} command", self.command)
     }
@@ -66,7 +66,7 @@ impl Action for RunCommand {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::Actions;
+    use crate::actions::ActionProviders;
 
     #[test]
     fn it_can_be_deserialize() {
@@ -77,10 +77,10 @@ mod tests {
       - hi
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::CommandRun(action)) => {
+            Some(ActionProviders::CommandRun(action)) => {
                 assert_eq!("echo", action.action.command);
                 assert_eq!("hi", action.action.args.first().unwrap().as_str());
             }
@@ -101,10 +101,10 @@ mod tests {
         GOROOT: test
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::CommandRun(action)) => {
+            Some(ActionProviders::CommandRun(action)) => {
                 assert_eq!("echo", action.action.command);
                 assert_eq!("hi", action.action.args.first().unwrap().as_str());
 

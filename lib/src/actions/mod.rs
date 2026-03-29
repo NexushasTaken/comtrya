@@ -62,9 +62,9 @@ impl<T> Variant<T> {
     }
 }
 
-impl<T> Action for ConditionalVariantAction<T>
+impl<T> Plan for ConditionalVariantAction<T>
 where
-    T: Action,
+    T: Plan,
 {
     fn summarize(&self) -> String {
         self.action.summarize()
@@ -111,7 +111,7 @@ where
 
 #[derive(JsonSchema, Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "action")]
-pub enum Actions {
+pub enum ActionProviders {
     #[serde(rename = "command.run", alias = "cmd.run")]
     CommandRun(ConditionalVariantAction<RunCommand>),
 
@@ -175,81 +175,81 @@ pub enum Actions {
     Plugin(ConditionalVariantAction<Plugin>),
 }
 
-impl Actions {
-    pub fn inner_ref(&self) -> &dyn Action {
+impl ActionProviders {
+    pub fn inner_ref(&self) -> &dyn Plan {
         match self {
-            Actions::BinaryGitHub(a) => a,
-            Actions::CommandRun(a) => a,
-            Actions::DirectoryCopy(a) => a,
-            Actions::DirectoryCreate(a) => a,
-            Actions::FileCopy(a) => a,
-            Actions::FileChown(a) => a,
-            Actions::FileDownload(a) => a,
-            Actions::FileLink(a) => a,
-            Actions::FileUnarchive(a) => a,
-            Actions::GitClone(a) => a,
-            Actions::GroupAdd(a) => a,
-            Actions::MacOSDefault(a) => a,
-            Actions::PackageInstall(a) => a,
-            Actions::PackageRepository(a) => a,
-            Actions::UserAdd(a) => a,
-            Actions::UserAddGroup(a) => a,
-            Actions::FileRemove(a) => a,
-            Actions::DirectoryRemove(a) => a,
-            Actions::Plugin(a) => a,
+            ActionProviders::BinaryGitHub(a) => a,
+            ActionProviders::CommandRun(a) => a,
+            ActionProviders::DirectoryCopy(a) => a,
+            ActionProviders::DirectoryCreate(a) => a,
+            ActionProviders::FileCopy(a) => a,
+            ActionProviders::FileChown(a) => a,
+            ActionProviders::FileDownload(a) => a,
+            ActionProviders::FileLink(a) => a,
+            ActionProviders::FileUnarchive(a) => a,
+            ActionProviders::GitClone(a) => a,
+            ActionProviders::GroupAdd(a) => a,
+            ActionProviders::MacOSDefault(a) => a,
+            ActionProviders::PackageInstall(a) => a,
+            ActionProviders::PackageRepository(a) => a,
+            ActionProviders::UserAdd(a) => a,
+            ActionProviders::UserAddGroup(a) => a,
+            ActionProviders::FileRemove(a) => a,
+            ActionProviders::DirectoryRemove(a) => a,
+            ActionProviders::Plugin(a) => a,
         }
     }
 }
 
-impl Deref for Actions {
-    type Target = dyn Action;
+impl Deref for ActionProviders {
+    type Target = dyn Plan;
     fn deref(&self) -> &Self::Target {
         match self {
-            Actions::BinaryGitHub(a) => a,
-            Actions::CommandRun(a) => a,
-            Actions::DirectoryCopy(a) => a,
-            Actions::DirectoryCreate(a) => a,
-            Actions::FileCopy(a) => a,
-            Actions::FileChown(a) => a,
-            Actions::FileDownload(a) => a,
-            Actions::FileLink(a) => a,
-            Actions::FileUnarchive(a) => a,
-            Actions::GitClone(a) => a,
-            Actions::GroupAdd(a) => a,
-            Actions::MacOSDefault(a) => a,
-            Actions::PackageInstall(a) => a,
-            Actions::PackageRepository(a) => a,
-            Actions::UserAdd(a) => a,
-            Actions::UserAddGroup(a) => a,
-            Actions::FileRemove(a) => a,
-            Actions::DirectoryRemove(a) => a,
-            Actions::Plugin(a) => a,
+            ActionProviders::BinaryGitHub(a) => a,
+            ActionProviders::CommandRun(a) => a,
+            ActionProviders::DirectoryCopy(a) => a,
+            ActionProviders::DirectoryCreate(a) => a,
+            ActionProviders::FileCopy(a) => a,
+            ActionProviders::FileChown(a) => a,
+            ActionProviders::FileDownload(a) => a,
+            ActionProviders::FileLink(a) => a,
+            ActionProviders::FileUnarchive(a) => a,
+            ActionProviders::GitClone(a) => a,
+            ActionProviders::GroupAdd(a) => a,
+            ActionProviders::MacOSDefault(a) => a,
+            ActionProviders::PackageInstall(a) => a,
+            ActionProviders::PackageRepository(a) => a,
+            ActionProviders::UserAdd(a) => a,
+            ActionProviders::UserAddGroup(a) => a,
+            ActionProviders::FileRemove(a) => a,
+            ActionProviders::DirectoryRemove(a) => a,
+            ActionProviders::Plugin(a) => a,
         }
     }
 }
 
-impl Display for Actions {
+impl Display for ActionProviders {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
-            Actions::CommandRun(_) => "command.run",
-            Actions::DirectoryCopy(_) => "directory.copy",
-            Actions::DirectoryCreate(_) => "directory.create",
-            Actions::FileCopy(_) => "file.copy",
-            Actions::FileChown(_) => "file.chown",
-            Actions::FileDownload(_) => "file.download",
-            Actions::FileLink(_) => "file.link",
-            Actions::FileRemove(_) => "file.remove",
-            Actions::FileUnarchive(_) => "file.unarchive",
-            Actions::DirectoryRemove(_) => "directory.remove",
-            Actions::BinaryGitHub(_) => "github.binary",
-            Actions::GitClone(_) => "git.clone",
-            Actions::GroupAdd(_) => "group.add",
-            Actions::MacOSDefault(_) => "macos.default",
-            Actions::PackageInstall(_) => "package.install",
-            Actions::PackageRepository(_) => "package.repository",
-            Actions::UserAdd(_) => "user.add",
-            Actions::UserAddGroup(_) => "user.group",
-            Actions::Plugin(_) => "plugin",
+            ActionProviders::CommandRun(_) => "command.run",
+            ActionProviders::DirectoryCopy(_) => "directory.copy",
+            ActionProviders::DirectoryCreate(_) => "directory.create",
+            ActionProviders::FileCopy(_) => "file.copy",
+            ActionProviders::FileChown(_) => "file.chown",
+            ActionProviders::FileDownload(_) => "file.download",
+            ActionProviders::FileLink(_) => "file.link",
+            ActionProviders::FileRemove(_) => "file.remove",
+            ActionProviders::FileUnarchive(_) => "file.unarchive",
+            ActionProviders::DirectoryRemove(_) => "directory.remove",
+            ActionProviders::BinaryGitHub(_) => "github.binary",
+            ActionProviders::GitClone(_) => "git.clone",
+            ActionProviders::GroupAdd(_) => "group.add",
+            ActionProviders::MacOSDefault(_) => "macos.default",
+            ActionProviders::PackageInstall(_) => "package.install",
+            ActionProviders::PackageRepository(_) => "package.repository",
+            ActionProviders::UserAdd(_) => "user.add",
+            ActionProviders::UserAddGroup(_) => "user.group",
+            ActionProviders::Plugin(_) => "plugin",
         };
 
         write!(f, "{name}")
@@ -276,7 +276,7 @@ impl<E: std::error::Error> From<E> for ActionError {
     }
 }
 
-pub trait Action {
+pub trait Plan {
     fn summarize(&self) -> String {
         warn!("need to define action summarize");
         "not found action summarize".to_string()
@@ -286,7 +286,7 @@ pub trait Action {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::{command::run::RunCommand, Actions};
+    use crate::actions::{command::run::RunCommand, ActionProviders};
     use crate::manifests::Manifest;
 
     #[test]
@@ -306,7 +306,7 @@ actions:
         let action = &m.actions[0];
 
         let ext = match action {
-            Actions::CommandRun(cr) => cr,
+            ActionProviders::CommandRun(cr) => cr,
             _ => panic!("did not get a command to run"),
         };
 

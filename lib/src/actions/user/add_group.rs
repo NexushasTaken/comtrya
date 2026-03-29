@@ -1,5 +1,5 @@
 use super::providers::UserProviders;
-use crate::actions::Action;
+use crate::actions::Plan;
 use crate::contexts::Contexts;
 use crate::manifests::Manifest;
 use crate::steps::Step;
@@ -20,7 +20,7 @@ pub struct UserAddGroup {
     pub provider: UserProviders,
 }
 
-impl Action for UserAddGroup {
+impl Plan for UserAddGroup {
     fn summarize(&self) -> String {
         format!(
             "Adding user {} to group(s) {}",

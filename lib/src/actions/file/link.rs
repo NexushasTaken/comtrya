@@ -3,7 +3,7 @@ use crate::manifests::Manifest;
 use crate::steps::initializers::FileExists;
 use crate::steps::initializers::FlowControl::Ensure;
 use crate::steps::Step;
-use crate::{actions::Action, contexts::Contexts};
+use crate::{actions::Plan, contexts::Contexts};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -116,7 +116,7 @@ impl FileLink {
 
 impl FileAction for FileLink {}
 
-impl Action for FileLink {
+impl Plan for FileLink {
     fn summarize(&self) -> String {
         format!(
             "Linking file {} to {}",
@@ -145,7 +145,7 @@ impl Action for FileLink {
 #[cfg(test)]
 mod tests {
     use crate::{
-        actions::{Action, Actions},
+        actions::{Plan, ActionProviders},
         config::Config,
         contexts::build_contexts,
         manifests::Manifest,
@@ -161,10 +161,10 @@ mod tests {
   target: b
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::FileLink(action)) => {
+            Some(ActionProviders::FileLink(action)) => {
                 assert_eq!("a", action.action.source());
                 assert_eq!("b", action.action.target());
             }
@@ -180,10 +180,10 @@ mod tests {
   to: b
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::FileLink(action)) => {
+            Some(ActionProviders::FileLink(action)) => {
                 assert_eq!("a", action.action.source());
                 assert_eq!("b", action.action.target());
             }

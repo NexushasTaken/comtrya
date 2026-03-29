@@ -1,4 +1,4 @@
-use crate::actions::Action;
+use crate::actions::Plan;
 use crate::atoms::file::Chmod;
 use crate::atoms::http::Download;
 use crate::contexts::Contexts;
@@ -24,7 +24,7 @@ struct GitHubAsset {
     pub score: i32,
 }
 
-impl Action for BinaryGitHub {
+impl Plan for BinaryGitHub {
     fn summarize(&self) -> String {
         format!(
             "Downloading binary from {} to {}",

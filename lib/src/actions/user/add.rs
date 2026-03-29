@@ -1,6 +1,6 @@
 use super::User;
 use super::UserVariant;
-use crate::actions::Action;
+use crate::actions::Plan;
 use crate::contexts::Contexts;
 use crate::manifests::Manifest;
 use crate::steps::Step;
@@ -11,7 +11,7 @@ use tracing::debug;
 
 pub type UserAdd = User;
 
-impl Action for UserAdd {
+impl Plan for UserAdd {
     fn summarize(&self) -> String {
         format!("Adding user: {}", self.username)
     }

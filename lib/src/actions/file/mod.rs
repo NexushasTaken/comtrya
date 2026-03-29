@@ -5,14 +5,14 @@ pub mod link;
 pub mod remove;
 pub mod unarchive;
 
-use crate::actions::Action;
+use crate::actions::Plan;
 use crate::manifests::Manifest;
 use anyhow::{anyhow, Result};
 use normpath::PathExt;
 use serde::{de::Error, Deserialize, Deserializer};
 use std::path::PathBuf;
 
-pub trait FileAction: Action {
+pub trait FileAction: Plan {
     fn resolve(&self, manifest: &Manifest, path: &str) -> anyhow::Result<PathBuf> {
         Ok(manifest
             .root_dir

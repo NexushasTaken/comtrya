@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::{actions::Action, steps::Step};
+use crate::{actions::Plan, steps::Step};
 
 use super::FileAction;
 
@@ -16,7 +16,7 @@ impl FileRemove {}
 
 impl FileAction for FileRemove {}
 
-impl Action for FileRemove {
+impl Plan for FileRemove {
     fn summarize(&self) -> String {
         format!("Removing file {}", self.target)
     }
@@ -42,7 +42,7 @@ impl Action for FileRemove {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::Actions;
+    use crate::actions::ActionProviders;
 
     #[test]
     fn it_can_be_deserialized() {
@@ -51,10 +51,10 @@ mod tests {
   target: a
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::FileRemove(action)) => {
+            Some(ActionProviders::FileRemove(action)) => {
                 assert_eq!("a", action.action.target);
             }
             _ => {

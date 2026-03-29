@@ -1,6 +1,6 @@
 use super::Group;
 use super::GroupVariant;
-use crate::actions::Action;
+use crate::actions::Plan;
 use crate::contexts::Contexts;
 use crate::manifests::Manifest;
 use crate::steps::Step;
@@ -8,7 +8,7 @@ use std::ops::Deref;
 
 pub type GroupAdd = Group;
 
-impl Action for GroupAdd {
+impl Plan for GroupAdd {
     fn summarize(&self) -> String {
         format!("Creating group {}", self.group_name)
     }

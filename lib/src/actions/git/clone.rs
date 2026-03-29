@@ -1,4 +1,4 @@
-use crate::actions::Action;
+use crate::actions::Plan;
 use crate::contexts::Contexts;
 use crate::manifests::Manifest;
 use crate::steps::Step;
@@ -12,7 +12,7 @@ pub struct GitClone {
     pub directory: String,
 }
 
-impl Action for GitClone {
+impl Plan for GitClone {
     fn summarize(&self) -> String {
         format!("Cloning repository {} to {}", self.repo_url, self.directory)
     }

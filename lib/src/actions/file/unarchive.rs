@@ -2,7 +2,7 @@ use super::FileAction;
 use crate::atoms::file::Unarchive;
 use crate::manifests::Manifest;
 use crate::steps::Step;
-use crate::{actions::Action, contexts::Contexts};
+use crate::{actions::Plan, contexts::Contexts};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -21,7 +21,7 @@ impl FileUnarchive {}
 
 impl FileAction for FileUnarchive {}
 
-impl Action for FileUnarchive {
+impl Plan for FileUnarchive {
     fn summarize(&self) -> String {
         format!("Unarchiving file {} to {}", self.from, self.to)
     }
@@ -43,7 +43,7 @@ impl Action for FileUnarchive {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::Actions;
+    use crate::actions::ActionProviders;
 
     #[test]
     fn it_can_be_deserialized() {
@@ -53,10 +53,10 @@ mod tests {
   to: b
 "#;
 
-        let mut actions: Vec<Actions> = serde_yaml_ng::from_str(yaml).unwrap();
+        let mut actions: Vec<ActionProviders> = serde_yaml_ng::from_str(yaml).unwrap();
 
         match actions.pop() {
-            Some(Actions::FileUnarchive(action)) => {
+            Some(ActionProviders::FileUnarchive(action)) => {
                 assert_eq!("a", action.action.from);
                 assert_eq!("b", action.action.to);
             }

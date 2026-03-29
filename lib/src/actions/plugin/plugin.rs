@@ -26,7 +26,7 @@ use tracing::{debug, error, info, instrument};
 
 use super::get_plugin;
 use crate::{
-    actions::Action,
+    actions::Plan,
     atoms::plugin::{PluginExec, PluginSpec},
     contexts::Contexts,
     manifests::Manifest,
@@ -301,7 +301,7 @@ impl Display for Plugin {
     }
 }
 
-impl Action for Plugin {
+impl Plan for Plugin {
     fn summarize(&self) -> String {
         self.runtime(None)
             .as_ref()

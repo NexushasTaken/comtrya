@@ -1,5 +1,5 @@
 use super::providers::PackageProviders;
-use crate::actions::Action;
+use crate::actions::Plan;
 use crate::contexts::Contexts;
 use crate::manifests::Manifest;
 use crate::steps::Step;
@@ -28,7 +28,7 @@ pub struct RepositoryKey {
     pub fingerprint: Option<String>,
 }
 
-impl Action for PackageRepository {
+impl Plan for PackageRepository {
     fn summarize(&self) -> String {
         format!("Adding repository {}", self.name)
     }
