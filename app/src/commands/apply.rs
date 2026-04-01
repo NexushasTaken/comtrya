@@ -304,6 +304,7 @@ fn execute_actions(
 
             match steps.peek() {
                 Some(_) => {
+                    info!("{}", action.summarize());
                     for mut step in steps {
                         if dry_run {
                             continue;
@@ -324,7 +325,6 @@ fn execute_actions(
                             break;
                         }
                     }
-                    info!("{}", action.summarize());
                 }
                 None => info!("nothing to be done to reconcile action"),
             }
