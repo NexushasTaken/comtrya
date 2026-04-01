@@ -27,3 +27,5 @@ actions:
 ```
 
 As shown, at the top of the `users.yaml` file, `depends` takes a lists of manifests that this manifest depends on.
+
+> TODO: add documentation for depending on manifest in subdirectories
