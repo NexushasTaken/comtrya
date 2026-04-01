@@ -1,9 +1,11 @@
+use std::process::Stdio;
+
 use crate::atoms::Outcome;
 
 use super::super::Atom;
 use crate::utilities;
 use anyhow::anyhow;
-use tracing::debug;
+use tracing::{debug, field::debug};
 
 #[derive(Default)]
 pub struct Exec {
@@ -13,6 +15,7 @@ pub struct Exec {
     pub environment: Vec<(String, String)>,
     pub privileged: bool,
     pub privilege_provider: String,
+    pub interactive: bool,
     pub(crate) status: ExecStatus,
 }
 
@@ -127,40 +130,70 @@ impl Atom for Exec {
             }
         }
 
-        match std::process::Command::new(&command)
-            .envs(self.environment.clone())
-            .args(&arguments)
-            .current_dir(self.working_dir.clone().unwrap_or_else(|| {
-                std::env::current_dir()
-                    .map(|current_dir| current_dir.display().to_string())
-                    .expect("Failed to get current directory")
-            }))
-            .output()
-        {
-            Ok(output) if output.status.success() => {
-                self.status.stdout = String::from_utf8(output.stdout)?;
-                self.status.stderr = String::from_utf8(output.stderr)?;
+        if self.interactive {
+            match std::process::Command::new(&command)
+                .envs(self.environment.clone())
+                .args(&arguments)
+                .current_dir(self.working_dir.clone().unwrap_or_else(|| {
+                    std::env::current_dir()
+                        .map(|current_dir| current_dir.display().to_string())
+                        .expect("Failed to get current directory")
+                }))
+                .spawn()
+            {
+                Ok(mut output) => match output.wait() {
+                    Ok(status) => {
+                        if status.success() {
+                            Ok(())
+                        } else {
+                            if let Some(code) = status.code() {
+                                return Err(anyhow!("Command failed with exit code: {}", code));
+                            } else {
+                                return Err(anyhow!("Process terminated by signal"));
+                            }
+                        }
+                    }
+                    Err(err) => Err(anyhow!("Command `{}` failed to execute: {}", &command, err)),
+                },
 
-                debug!("stdout: {}", &self.status.stdout);
-
-                Ok(())
+                Err(err) => Err(anyhow!(err)),
             }
+        } else {
+            match std::process::Command::new(&command)
+                .envs(self.environment.clone())
+                .args(&arguments)
+                .current_dir(self.working_dir.clone().unwrap_or_else(|| {
+                    std::env::current_dir()
+                        .map(|current_dir| current_dir.display().to_string())
+                        .expect("Failed to get current directory")
+                }))
+                .output()
+            {
+                Ok(output) if output.status.success() => {
+                    self.status.stdout = String::from_utf8(output.stdout)?;
+                    self.status.stderr = String::from_utf8(output.stderr)?;
 
-            Ok(output) => {
-                self.status.stdout = String::from_utf8(output.stdout)?;
-                self.status.stderr = String::from_utf8(output.stderr)?;
+                    debug!("stdout: {}", &self.status.stdout);
 
-                debug!("exit code: {}", &self.status.code);
-                debug!("stdout: {}", &self.status.stdout);
-                debug!("stderr: {}", &self.status.stderr);
+                    Ok(())
+                }
 
-                Err(anyhow!(
-                    "Command failed with exit code: {}",
-                    output.status.code().unwrap_or(1)
-                ))
+                Ok(output) => {
+                    self.status.stdout = String::from_utf8(output.stdout)?;
+                    self.status.stderr = String::from_utf8(output.stderr)?;
+
+                    debug!("exit code: {}", &self.status.code);
+                    debug!("stdout: {}", &self.status.stdout);
+                    debug!("stderr: {}", &self.status.stderr);
+
+                    Err(anyhow!(
+                        "Command failed with exit code: {}",
+                        output.status.code().unwrap_or(1)
+                    ))
+                }
+
+                Err(err) => Err(anyhow!(err)),
             }
-
-            Err(err) => Err(anyhow!(err)),
         }
     }
 

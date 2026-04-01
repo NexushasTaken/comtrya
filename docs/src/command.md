@@ -6,14 +6,15 @@
 
 This is the most basic, but yet powerful action as it can be used to run anything needed that is not directly supported in comtrya by an action. An alias exists, allowing you to abbreviate `command` as `cmd`.
 
-| Key        | Type                    | Optional | Description                                     |
-|:-----------|:------------------------|:---------|:------------------------------------------------|
-| action     | string                  | no       | command.run                                     |
-| command    | string                  | no       | command to run                                  |
-| args       | string                  | yes      | argument passed                                 |
-| dir        | string                  | yes      | actual working directory                        |
-| privileged | bool                    | yes      | elevate privileges when executing               |
-| env        | HashMap<string, string> | yes      | key and values for scoped environment variables |
+| Key         | Type                    | Optional | Description                                                             |
+|:------------|:------------------------|:---------|:------------------------------------------------------------------------|
+| action      | string                  | no       | command.run                                                             |
+| command     | string                  | no       | command to run                                                          |
+| args        | string                  | yes      | argument passed                                                         |
+| dir         | string                  | yes      | actual working directory                                                |
+| privileged  | bool                    | yes      | elevate privileges when executing                                       |
+| env         | HashMap<string, string> | yes      | key and values for scoped environment variables                         |
+| interactive | bool                    | yes      | Runs the command in the foreground to allow user input and interaction. |
 
 ### Scoped environment variables
 

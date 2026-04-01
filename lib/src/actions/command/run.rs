@@ -22,6 +22,9 @@ pub struct RunCommand {
 
     #[serde(default)]
     pub env: HashMap<String, String>,
+
+    #[serde(default = "get_false")]
+    pub interactive: bool,
 }
 
 fn get_false() -> bool {
@@ -52,6 +55,7 @@ impl Plan for RunCommand {
                 privileged: self.privileged,
                 working_dir: Some(self.dir.clone()),
                 privilege_provider: privilege_provider.clone(),
+                interactive: self.interactive,
                 ..Default::default()
             }),
             initializers: vec![steps::initializers::FlowControl::Ensure(Box::new(
